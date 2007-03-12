@@ -15,15 +15,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
-# FIXME: for a strange bug in Python's import machinery, we need to adjust
-# the module name before proceeding to the PIL import. The name would
-# otherwise be "hooks.hook-PIL.Image", which will then produce this
-# monstruosity:
-#   <module 'hooks.hook-PIL.PIL.Image' from 'C:\python24\lib\site-packages\PIL\Image.pyc'>
-#
-__name__ = "hook-image"
+hiddenimports = []
 
-# Forward to shared code for PIL. PIL can be imported either as a top-level package
-# (from PIL import Image), or not (import Image), because it installs a
-# PIL.pth.
-from shared_PIL_Image import *
+def install_Image(lis):
+    import Image
+    # PIL uses lazy initialization.
+    # you candecide if you want only the
+    # default stuff:
+    Image.preinit()
+    # or just everything:
+    Image.init()
+    import sys
+    for name in sys.modules:
+        if name[-11:] == "ImagePlugin":
+            lis.append(name)
+
+install_Image(hiddenimports)
